@@ -39,6 +39,11 @@ public class AllTests {
         test.addTestSuite( org.tzi.use.integration.uml.sys.expr.ExprNavigationTest.class );
         test.addTestSuite( org.tzi.use.integration.uml.sys.expr.ExpStdOpTest.class );
         test.addTestSuite( org.tzi.use.integration.uml.sys.expr.NavigationTest.class );
+        test.addTestSuite( org.tzi.use.integration.uml.sys.expr.ExpQueryUncertaintyTest.class );
+        test.addTestSuite( org.tzi.use.integration.uml.sys.expr.UBooleanExpOpsTest.class );
+        test.addTestSuite( org.tzi.use.integration.uml.sys.expr.UCollectionExpOpTest.class );
+        test.addTestSuite( org.tzi.use.integration.uml.sys.expr.UIntegerExpOpsTest.class );
+        test.addTestSuite( org.tzi.use.integration.uml.sys.expr.URealExpOpsTest.class );
         return test;
     }
 }
