@@ -152,4 +152,13 @@ public interface Type extends BufferedToString {
     boolean isTypeOfVoidType();
     
     boolean isInstantiableCollection();
+
+    boolean isTypeOfUInteger();
+    boolean isKindOfUInteger(VoidHandling h);
+    boolean isTypeOfUReal();
+    boolean isKindOfUReal(VoidHandling h);
+    boolean isTypeOfUBoolean();
+    boolean isKindOfUBoolean(VoidHandling h);
+    boolean isTypeOfUString();
+    boolean isKindOfUString(VoidHandling h);
 }
