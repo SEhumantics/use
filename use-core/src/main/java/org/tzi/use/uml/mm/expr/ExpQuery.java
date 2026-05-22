@@ -52,6 +52,11 @@ public abstract class ExpQuery extends Expression {
      */
     protected Expression fQueryExp;
 
+    /**
+     * Expression with a real uncertainty (may be null)
+     */
+    protected Expression fUncertaintyExp;
+
     protected ExpQuery(Type resultType, VarDeclList elemVarDecls,
             Expression rangeExp, Expression queryExp)
             throws ExpInvalidException {
@@ -86,6 +91,21 @@ public abstract class ExpQuery extends Expression {
         }
     }
 
+    protected ExpQuery(Type resultType, VarDeclList elemVarDecls,
+                       Expression rangeExp, Expression queryExp,
+                       Expression uncertaintyExp)
+            throws ExpInvalidException {
+        this(resultType, elemVarDecls, rangeExp, queryExp);
+
+        // assert that uncertainty expression is Real
+        if (!uncertaintyExp.type().isKindOfReal(VoidHandling.EXCLUDE_VOID))
+            throw new ExpInvalidException("Type of confident must be Real"
+                        + ", found type '" + uncertaintyExp.type()
+                        + "' in expressión '" + uncertaintyExp + "'");
+
+        this.fUncertaintyExp = uncertaintyExp;
+    }
+
 	@Override
 	protected boolean childExpressionRequiresPreState() {
 		return fRangeExp.requiresPreState() || fQueryExp.requiresPreState();
@@ -97,6 +117,13 @@ public abstract class ExpQuery extends Expression {
             throw new ExpInvalidException("Argument expression of `" + name()
                     + "' must have boolean type, found `" + fQueryExp.type()
                     + "'.");
+    }
+
+    protected void assertKindOfUBoolean() throws ExpInvalidException {
+        // queryExp must be kind of UBoolean expression with uncertainty queries.
+        if (!fQueryExp.type().isKindOfUBoolean(VoidHandling.EXCLUDE_VOID))
+            throw new ExpInvalidException("Argument expression of '" + name()
+            + "' must be kind of UBoolean type, found '" + fQueryExp.type() + "'");
     }
 
     /**
@@ -142,6 +169,67 @@ public abstract class ExpQuery extends Expression {
         
         // result is collection with selected/rejected values
         return ((CollectionType)rangeVal.type()).createCollectionValue(resValues);
+    }
+
+    protected final Value evalUSelect(EvalContext ctx) {
+        Value result = UndefinedValue.instance;
+        double confident = evalAndAssertConfident(ctx);
+
+        // evaluate range
+        Value v = fRangeExp.eval(ctx);
+        if (v.isUndefined())
+            return UndefinedValue.instance;
+        CollectionValue rangeVal = (CollectionValue) v;
+
+        // Prepare result value
+        ArrayList<Value> resValues = new ArrayList<>();
+
+        if (!rangeVal.type().isInstantiableCollection())
+            throw new RuntimeException("rangeVal is not of collection type: " + rangeVal.type());
+
+        if (!fElemVarDecls.isEmpty())
+            ctx.pushVarBinding(fElemVarDecls.varDecl(0).name(), null);
+
+        for (Value elemVal : rangeVal) {
+
+            if (!fElemVarDecls.isEmpty())
+                ctx.varBindings().setPeekValue(elemVal);
+
+            Value queryVal = fQueryExp.eval(ctx);
+
+            if (queryVal.isUndefined())
+                queryVal = BooleanValue.FALSE;
+
+            if (queryVal.isBoolean() && ((BooleanValue) queryVal).value())
+                resValues.add(elemVal);
+            else if (queryVal.isUBoolean() && ((UBooleanValue) queryVal).probability() >= confident)
+                resValues.add(elemVal);
+
+        }
+
+        if (!fElemVarDecls.isEmpty())
+            ctx.popVarBinding();
+
+        return ((CollectionType) rangeVal.type()).createCollectionValue(resValues);
+    }
+
+    // check that confident is between 0 and 1 (if null, the confident is set by default to 0.5)
+    private double evalAndAssertConfident(EvalContext ctx) {
+        double confident = 0.5;
+
+        if (fUncertaintyExp != null) {
+            Value confidentValue = fUncertaintyExp.eval(ctx);
+
+            if (confidentValue.isReal())
+                confident = ((RealValue) confidentValue).value();
+            else
+                confident = ((IntegerValue) confidentValue).value();
+
+            if (confident < 0 || confident > 1)
+                throw new RuntimeException("Confident value must be between 0 and 1, found '"
+                        + fUncertaintyExp.toString() + "'");
+        }
+        return confident;
     }
 
     /**

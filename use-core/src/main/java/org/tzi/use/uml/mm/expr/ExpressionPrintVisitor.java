@@ -177,6 +177,11 @@ public class ExpressionPrintVisitor implements ExpressionVisitor {
 	}
 
 	@Override
+	public void visitConstUBoolean(ExpConstUBoolean exp) {
+		writer.write(literal(exp.toString(), exp));
+	}
+
+	@Override
 	public void visitConstEnum(ExpConstEnum exp) {
 		writer.write(type(exp.type().toString(), exp));
 		writer.write("::");
@@ -189,8 +194,18 @@ public class ExpressionPrintVisitor implements ExpressionVisitor {
 	}
 
 	@Override
+	public void visitConstUInteger(ExpConstUInteger exp) {
+		writer.write(literal(exp.toString(), exp));
+	}
+
+	@Override
 	public void visitConstReal(ExpConstReal exp) {
 		writer.write(literal(String.valueOf(exp.value()), exp));
+	}
+
+	@Override
+	public void visitConstUReal(ExpConstUReal exp) {
+		writer.write(literal(exp.toString(), exp));
 	}
 
 	@Override
@@ -198,6 +213,11 @@ public class ExpressionPrintVisitor implements ExpressionVisitor {
 		writer.write("'");
 		writer.write(literal(exp.value(), exp));
 		writer.write("'");
+	}
+
+	@Override
+	public void visitConstUString(ExpConstUString exp) {
+		writer.write(literal(exp.toString(), exp));
 	}
 
 	@Override
@@ -408,6 +428,16 @@ public class ExpressionPrintVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitSelect(ExpSelect exp) {
+		visitQuery(exp);
+	}
+
+	@Override
+	public void visitUSelect(ExpUSelect exp) {
+		visitQuery(exp);
+	}
+
+	@Override
+	public void visitUSelectC(ExpUSelectC exp) {
 		visitQuery(exp);
 	}
 

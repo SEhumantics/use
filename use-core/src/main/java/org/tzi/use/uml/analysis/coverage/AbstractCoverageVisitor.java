@@ -349,4 +349,30 @@ public abstract class AbstractCoverageVisitor implements ExpressionVisitor {
 		exp.getStart().processWithVisitor(this);
 		exp.getEnd().processWithVisitor(this);
 	}
+
+	@Override
+	public void visitConstUBoolean(ExpConstUBoolean exp) {
+	}
+
+	@Override
+	public void visitConstUInteger(ExpConstUInteger exp) {
+	}
+
+	@Override
+	public void visitConstUReal(ExpConstUReal exp) {
+	}
+
+	@Override
+	public void visitConstUString(ExpConstUString exp) {
+	}
+
+	@Override
+	public void visitUSelect(ExpUSelect exp) {
+		visitQuery(exp);
+	}
+
+	@Override
+	public void visitUSelectC(ExpUSelectC exp) {
+		visitQuery(exp);
+	}
 }

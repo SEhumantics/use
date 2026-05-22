@@ -74,4 +74,10 @@ public interface ExpressionVisitor {
 	void visitExpSelectByType(ExpSelectByType exp);
 	void visitRange(ExpRange exp);
 	void visitNavigationClassifierSource(ExpNavigationClassifierSource exp);
+	void visitConstUBoolean(ExpConstUBoolean exp);
+	void visitConstUInteger(ExpConstUInteger exp);
+	void visitConstUReal(ExpConstUReal exp);
+	void visitConstUString(ExpConstUString exp);
+	void visitUSelect(ExpUSelect exp);
+	void visitUSelectC(ExpUSelectC exp);
 }

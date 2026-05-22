@@ -95,6 +95,12 @@ public abstract class OpGeneric {
 		StandardOperationsBag.registerTypeOperations(opmap);
 		StandardOperationsSequence.registerTypeOperations(opmap);
 		StandardOperationsOrderedSet.registerTypeOperations(opmap);
+
+		// Uncertainty
+		StandardOperationsUBoolean.registerTypeOperations(opmap);
+		StandardOperationsUInteger.registerTypeOperations(opmap);
+		StandardOperationsUReal.registerTypeOperations(opmap);
+		StandardOperationsUString.registerTypeOperations(opmap);
 	}
 	
 	/**
