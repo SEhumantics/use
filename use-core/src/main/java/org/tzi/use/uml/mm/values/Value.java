@@ -81,6 +81,22 @@ public abstract class Value implements Comparable<Value>, BufferedToString {
         return false;
     }
 
+    public boolean isUBoolean() {
+        return false;
+    }
+
+    public boolean isUInteger() {
+        return false;
+    }
+
+    public boolean isUReal() {
+        return false;
+    }
+
+    public boolean isUString() {
+        return false;
+    }
+
     public boolean isDefined() {
         return ! isUndefined();
     }
