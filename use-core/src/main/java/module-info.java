@@ -52,4 +52,5 @@ module use.core {
     exports org.tzi.use.parser.soil.ast;
     exports org.tzi.use.uml.sys.soil.library;
     exports org.tzi.use.parser.use.statemachines;
+    exports uDataTypes;
 }
