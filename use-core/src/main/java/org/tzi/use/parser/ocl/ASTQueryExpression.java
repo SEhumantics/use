@@ -39,6 +39,8 @@ import org.tzi.use.uml.mm.expr.ExpOne;
 import org.tzi.use.uml.mm.expr.ExpReject;
 import org.tzi.use.uml.mm.expr.ExpSelect;
 import org.tzi.use.uml.mm.expr.ExpSortedBy;
+import org.tzi.use.uml.mm.expr.ExpUSelect;
+import org.tzi.use.uml.mm.expr.ExpUSelectC;
 import org.tzi.use.uml.mm.expr.ExpVariable;
 import org.tzi.use.uml.mm.expr.Expression;
 import org.tzi.use.uml.mm.expr.VarDecl;
@@ -56,6 +58,7 @@ public class ASTQueryExpression extends ASTExpression {
     private ASTExpression fRange; // may be null
     private ASTElemVarsDeclaration fDeclList;
     private ASTExpression fExpr;
+    private ASTExpression fUncertainty;
 
     public ASTQueryExpression(Token op, 
                               ASTExpression range, 
@@ -65,12 +68,31 @@ public class ASTQueryExpression extends ASTExpression {
         fRange = range;
         fDeclList = declList;
         fExpr = expr;
+        fUncertainty = null;
+    }
+
+    public ASTQueryExpression(Token op, 
+                              ASTExpression range, 
+                              ASTElemVarsDeclaration declList,
+                              ASTExpression expr,
+                              ASTExpression uncertainty) {
+        fOp = op;
+        fRange = range;
+        fDeclList = declList;
+        fExpr = expr;
+        fUncertainty = uncertainty;
     }
 
     public Expression gen(Context ctx) throws SemanticException {
         String opname = fOp.getText();
         Expression res = null;
         Expression range, expr;
+        Expression uncertainty = null;
+
+        // generate uncertainty if not null
+        if (fUncertainty != null) {
+            uncertainty = fUncertainty.gen(ctx);
+        }
 
         // check for empty range: do we have a context expression that
         // is implicitly assumed to be the source expression?
@@ -130,6 +152,8 @@ public class ASTQueryExpression extends ASTExpression {
             int idval = id.intValue();
             switch ( idval ) {
             case ParserHelper.Q_SELECT_ID:
+            case ParserHelper.Q_USELECT_ID:
+            case ParserHelper.Q_USELECTC_ID:
             case ParserHelper.Q_COLLECT_ID:
             case ParserHelper.Q_COLLECTNESTED_ID:
             case ParserHelper.Q_REJECT_ID:
@@ -148,6 +172,14 @@ public class ASTQueryExpression extends ASTExpression {
                 switch ( idval ) {
                 case ParserHelper.Q_SELECT_ID:
                     res = new ExpSelect(decl, range, expr);
+                    break;
+                case ParserHelper.Q_USELECT_ID:
+                    res = new ExpUSelect(decl, range, expr);
+                    break;
+                case ParserHelper.Q_USELECTC_ID:
+                    if (uncertainty == null)
+                        throw new SemanticException(fOp, "'" + opname + "' need to specify the confidence.");
+                    res = new ExpUSelectC(decl, range, expr, uncertainty);
                     break;
                 case ParserHelper.Q_COLLECTNESTED_ID:
                     res = new ExpCollectNested(decl, range, expr);
@@ -204,11 +236,18 @@ public class ASTQueryExpression extends ASTExpression {
 		Set<String> freeVarsInExpr = fExpr.getFreeVariables();
 		freeVarsInExpr.removeAll(fDeclList.getVarNames());
 	
-		freeVars.addAll(freeVarsInExpr);	
+		freeVars.addAll(freeVarsInExpr);
+
+        if (fUncertainty != null) {
+            fUncertainty.getFreeVariables(freeVars);
+        }
 	}
 
     @Override
 	public String toString() {
-	    return "(" + fOp + " " + fRange + " " + fDeclList + " " + fExpr + ")";
+        StringBuilder sb = new StringBuilder("(" + fOp + " " + fRange + " " + fDeclList + " " + fExpr);
+        if (fUncertainty != null)
+            sb.append(", " + fUncertainty);
+        return sb.append(")").toString();
 	}
 }

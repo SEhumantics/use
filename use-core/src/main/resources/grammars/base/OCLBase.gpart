@@ -322,13 +322,17 @@ propertyCall[ASTExpression source, boolean followsArrow] returns [ASTExpression 
     "(" [ elemVarsDeclaration "|" ] expression ")"
 */
 queryExpression[ASTExpression range] returns [ASTExpression n]	
-@init {ASTElemVarsDeclaration decl = new ASTElemVarsDeclaration(); }:
+@init {
+    ASTElemVarsDeclaration decl = new ASTElemVarsDeclaration();
+    ASTExpression uncer = null;
+}:
     op=IDENT 
     LPAREN 
     ( decls=elemVarsDeclaration {decl = $decls.n;} BAR )?
     nExp=expression
+    ( COMMA uncerExp=additiveExpression { uncer = $uncerExp.n;} )?
     RPAREN
-    { $n = new ASTQueryExpression($op, $range, decl, $nExp.n); }
+    { $n = new ASTQueryExpression($op, $range, decl, $nExp.n, uncer); }
     ;
 
 
@@ -479,6 +483,10 @@ literal returns [ASTExpression n]
     | i=INT    { $n = new ASTIntegerLiteral($i); }
     | r=REAL   { $n = new ASTRealLiteral($r); }
     | s=STRING { $n = new ASTStringLiteral($s); }
+    | 'UString' LPAREN usve=additiveExpression COMMA usue=additiveExpression RPAREN { $n = new ASTUStringLiteral($usve.n,$usue.n); }
+    | 'UReal' LPAREN urve=additiveExpression COMMA urue=additiveExpression RPAREN { $n = new ASTURealLiteral($urve.n,$urue.n); }
+    | 'UBoolean' LPAREN ubve=conditionalImpliesExpression COMMA ubpe=additiveExpression RPAREN { $n = new ASTUBooleanLiteral($ubve.n, $ubpe.n); }
+    | 'UInteger' LPAREN uive=additiveExpression COMMA uiue=additiveExpression RPAREN { $n = new ASTUIntegerLiteral($uive.n, $uiue.n); }
     | HASH enumLit=IDENT { $n = new ASTEnumLiteral($enumLit);}
     | enumName=IDENT '::' enumLit=IDENT { $n = new ASTEnumLiteral($enumName, $enumLit); }
     | modelQualifier=IDENT HASH enumName=IDENT '::' enumLit=IDENT
@@ -608,6 +616,7 @@ type returns [ASTType n]
     | nTCollection=collectionType { $n = $nTCollection.n; if ($n != null) $n.setStartToken(tok); }
     | nTTuple=tupleType { $n = $nTTuple.n; if ($n != null) $n.setStartToken(tok); }
     | nTModelQualifiedType=modelQualifiedType { $n = $nTModelQualifiedType.n; if ($n != null) $n.setStartToken(tok); }
+    | nTUncertainty=uncertaintyType { $n = $nTUncertainty.n; if ($n != null) $n.setStartToken(tok); }
     )
     ;
 
@@ -674,4 +683,9 @@ modelQualifiedType returns [ASTModelQualifiedType n]
 :
     modelQualifier=IDENT HASH name=IDENT
     { $n = new ASTModelQualifiedType($modelQualifier, $name); }
+    ;
+
+uncertaintyType returns [ASTType n]
+:
+    name=('UReal'|'UInteger'|'UBoolean'|'UString') { $n = new ASTSimpleType($name); }
     ;
