@@ -236,6 +236,46 @@ public abstract class MClassifierImpl extends MModelElementImpl implements MClas
 	}
 
 	@Override
+	public boolean isTypeOfUInteger() {
+		return false;
+	}
+
+	@Override
+	public boolean isKindOfUInteger(VoidHandling h) {
+		return false;
+	}
+
+	@Override
+	public boolean isTypeOfUReal() {
+		return false;
+	}
+
+	@Override
+	public boolean isKindOfUReal(VoidHandling h) {
+		return false;
+	}
+
+	@Override
+	public boolean isTypeOfUBoolean() {
+		return false;
+	}
+
+	@Override
+	public boolean isKindOfUBoolean(VoidHandling h) {
+		return false;
+	}
+
+	@Override
+	public boolean isTypeOfUString() {
+		return false;
+	}
+
+	@Override
+	public boolean isKindOfUString(VoidHandling h) {
+		return false;
+	}
+
+	@Override
 	public boolean isKindOfBoolean(VoidHandling h) {
 		return false;
 	}

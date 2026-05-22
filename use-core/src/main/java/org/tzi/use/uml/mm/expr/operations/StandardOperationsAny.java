@@ -4,8 +4,11 @@ import org.tzi.use.uml.mm.expr.EvalContext;
 import org.tzi.use.uml.mm.expr.Expression;
 import org.tzi.use.uml.mm.types.Type;
 import org.tzi.use.uml.mm.types.TypeFactory;
+import org.tzi.use.uml.mm.types.UncertainType;
 import org.tzi.use.uml.mm.values.BooleanValue;
 import org.tzi.use.uml.mm.values.Value;
+import org.tzi.use.uml.mm.values.UncertainValue;
+import org.tzi.use.uml.mm.values.UncertainBooleanValue;
 import org.tzi.use.util.StringUtil;
 
 import com.google.common.collect.Multimap;
@@ -43,10 +46,21 @@ final class Op_equal extends OpGeneric {
 	}
 
 	public Type matches(Type params[]) {
-		if (params.length == 2 && params[0].getLeastCommonSupertype(params[1]) != null)
-			return TypeFactory.mkBoolean();
-		else
-			return null;
+		boolean twoArgsAndCommonSupertype = params.length == 2 && params[0].getLeastCommonSupertype(params[1]) != null;
+		boolean someOfThemIsUncertaintyValue = params.length == 2 && (params[1] instanceof UncertainType || params[0] instanceof UncertainType);
+		Type result = null;
+
+		if (twoArgsAndCommonSupertype) {
+			boolean someOfThemIsUndefined = params[0].isTypeOfVoidType() || params[1].isTypeOfVoidType();
+
+			if (someOfThemIsUncertaintyValue && !someOfThemIsUndefined) {
+				result = TypeFactory.mkUBoolean();
+			}
+			else
+				result = TypeFactory.mkBoolean();
+		}
+
+		return result;
 	}
 
 	@Override
@@ -64,11 +78,39 @@ final class Op_equal extends OpGeneric {
 	}
 	
 	public Value eval(EvalContext ctx, Value[] args, Type resultType) {
+		Value result = null;
+		boolean someOfThemIsUndefined = args[1].isUndefined() || args[0].isUndefined();
+
+		if ((args[1] instanceof UncertainValue || args[0] instanceof UncertainValue) && !someOfThemIsUndefined)
+			result = evalUncertainBooleanResult(args);
+		else
+			result = evalBooleanResult(args);
+
+		return result;
+	}
+
+	private UncertainBooleanValue evalUncertainBooleanResult(Value [] args) {
+		UncertainValue value;
+		int index_other;
+
+		if (args[0] instanceof UncertainValue) {
+			value = (UncertainValue) args[0];
+			index_other = 1;
+		}
+		else {
+			value = (UncertainValue) args[1];
+			index_other = 0;
+		}
+
+		return value.uEquals(args[index_other]);
+	}
+
+	private BooleanValue evalBooleanResult(Value[] args) {
 		boolean res;
 
 		if (args[0].isUndefined())
 			return BooleanValue.get(args[1].isUndefined());
-		
+
 		if (args[1].type().conformsTo(args[0].type()))
 			res = args[0].equals(args[1]);
 		else if (args[0].type().conformsTo(args[1].type()))
@@ -97,16 +139,55 @@ final class Op_notequal extends OpGeneric {
 	}
 
 	public Type matches(Type params[]) {
-		if (params.length == 2 && params[0].getLeastCommonSupertype(params[1]) != null)
-			return TypeFactory.mkBoolean();
-		else
-			return null;
+		boolean twoArgsAndCommonSupertype = params.length == 2 && params[0].getLeastCommonSupertype(params[1]) != null;
+		boolean someOfThemIsUncertaintyValue = params.length == 2 && (params[1] instanceof UncertainType || params[0] instanceof UncertainType);
+		Type result = null;
+
+		if (twoArgsAndCommonSupertype) {
+			boolean someOfThemIsUndefined = params[0].isTypeOfVoidType() || params[1].isTypeOfVoidType();
+
+			if (someOfThemIsUncertaintyValue && !someOfThemIsUndefined) {
+				result = TypeFactory.mkUBoolean();
+			}
+			else
+				result = TypeFactory.mkBoolean();
+		}
+
+		return result;
 	}
 
 	public Value eval(EvalContext ctx, Value[] args, Type resultType) {
+		Value result = null;
+		boolean someOfThemIsUndefined = args[1].isUndefined() || args[0].isUndefined();
+
+		if ((args[1] instanceof UncertainValue || args[0] instanceof UncertainValue) && !someOfThemIsUndefined)
+			result = evalUncertainBooleanResult(args);
+		else
+			result = evalBooleanResult(args);
+
+		return result;
+	}
+
+	private UncertainBooleanValue evalUncertainBooleanResult(Value [] args) {
+		UncertainValue value;
+		int index_other;
+
+		if (args[0] instanceof UncertainValue) {
+			value = (UncertainValue) args[0];
+			index_other = 1;
+		}
+		else {
+			value = (UncertainValue) args[1];
+			index_other = 0;
+		}
+
+		return value.uDistinct(args[index_other]);
+	}
+
+	private BooleanValue evalBooleanResult(Value[] args) {
 		if (args[0].isUndefined())
 			return BooleanValue.get(!args[1].isUndefined());
-		
+
 		boolean res = !args[0].equals(args[1]);
 		return BooleanValue.get(res);
 	}

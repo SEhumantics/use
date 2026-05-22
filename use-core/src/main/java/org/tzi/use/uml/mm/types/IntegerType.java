@@ -42,7 +42,17 @@ public final class IntegerType extends BasicType {
 		return true;
 	}
 
-	@Override
+    @Override
+    public boolean isKindOfUInteger(VoidHandling h) {
+        return true;
+    }
+
+    @Override
+    public boolean isKindOfUReal(VoidHandling h) {
+        return true;
+    }
+
+    @Override
 	public boolean isKindOfNumber(VoidHandling h) {
     	return true;
     }
@@ -65,9 +75,11 @@ public final class IntegerType extends BasicType {
      */
     @Override
 	public Set<Type> allSupertypes() {
-        Set<Type> res = new HashSet<Type>(3);
+        Set<Type> res = new HashSet<Type>(5);
         res.add(TypeFactory.mkOclAny());
         res.add(TypeFactory.mkReal());
+        res.add(TypeFactory.mkUReal());
+        res.add(TypeFactory.mkUInteger());
         res.add(this);
         return res;
     }

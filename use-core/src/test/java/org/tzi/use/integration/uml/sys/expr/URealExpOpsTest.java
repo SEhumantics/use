@@ -1,5 +1,10 @@
 package org.tzi.use.integration.uml.sys.expr;
 
+
+
+import org.tzi.use.uml.mm.expr.ExpInvalidException;
+import org.tzi.use.uml.mm.expr.*;
+
 import junit.framework.TestCase;
 import org.tzi.use.uml.mm.ModelFactory;
 import org.tzi.use.uml.mm.values.*;

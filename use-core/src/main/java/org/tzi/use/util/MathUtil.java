@@ -90,4 +90,18 @@ public class MathUtil {
 		
 		return min;
 	}
+
+	/**
+	 * Calculates the rounded number with the digits passed as argument.
+	 *
+	 * @param value	  Value to be rounded.
+	 * @param digits  Digits to be adjusted.
+	 * @return	Value rounded at digits passed as argument.
+	 *
+	 * @author Víctor Manuel Ortiz
+	 */
+	public static double round(double value, int digits) {
+		double exp = Math.pow(10, digits);
+		return Math.round(value * exp) / exp;
+	}
 }

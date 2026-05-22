@@ -1,9 +1,15 @@
 package org.tzi.use.integration.uml.sys.expr;
 
+
+
+import org.tzi.use.uml.mm.expr.ExpInvalidException;
+
+import org.tzi.use.uml.mm.expr.*;
+
 import com.ximpleware.Expr;
 import junit.framework.TestCase;
 import org.tzi.use.uml.mm.ModelFactory;
-import org.tzi.use.uml.ocl.type.UncertainType;
+import org.tzi.use.uml.mm.types.UncertainType;
 import org.tzi.use.uml.mm.values.*;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.uml.sys.MSystemState;

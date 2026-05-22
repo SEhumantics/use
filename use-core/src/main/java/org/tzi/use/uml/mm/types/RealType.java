@@ -48,19 +48,25 @@ public final class RealType extends BasicType {
     	return true;
     }
     
+    @Override
+    public boolean isKindOfUReal(VoidHandling h) {
+        return true;
+    }
+    
     /** 
      * Returns true if this type is a subtype of <code>t</code>. 
      */
     public boolean conformsTo(Type t) {
-        return equals(t) || t.isTypeOfOclAny();
+        return equals(t) || t.isTypeOfUReal() || t.isTypeOfOclAny();
     }
 
     /** 
      * Returns the set of all supertypes (including this type).
      */
     public Set<Type> allSupertypes() {
-        Set<Type> res = new HashSet<Type>(2);
+        Set<Type> res = new HashSet<Type>(3);
         res.add(TypeFactory.mkOclAny());
+        res.add(TypeFactory.mkUReal());
         res.add(this);
         return res;
     }
